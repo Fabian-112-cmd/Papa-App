@@ -75,8 +75,41 @@ async function papaStart(){
  }catch(err){papaError(err.message)}
  el('papaLoading').hidden=true;el('papaAuth').hidden=false;
 }
+// iOS Face ID / Passwort-Autofill: Safari feuert nicht immer input/change.
+// Nach einer Benutzerinteraktion mit dem Passwortfeld erkennen wir per kurzer
+// Abfrage, ob ein Passwort ohne Tastatureingabe eingefügt wurde.
+let papaAutofillSubmitted=false;
+let papaManualTyping=false;
+let papaAutofillWatch=null;
+let papaWatchStarted=0;
+let papaInitialPassword='';
+function papaStopAutofillWatch(){if(papaAutofillWatch){clearInterval(papaAutofillWatch);papaAutofillWatch=null;}}
+function papaSubmitAutofilled(){
+ if(papaAutofillSubmitted||papaManualTyping||el('papaAuth').hidden)return;
+ const user=el('papaUsername'),pass=el('papaPassword');
+ if(!user.value.trim()||!pass.value||pass.value===papaInitialPassword)return;
+ papaAutofillSubmitted=true;papaStopAutofillWatch();
+ if(document.activeElement?.blur)document.activeElement.blur();
+ setTimeout(()=>{if(!el('papaAuth').hidden)el('papaLoginForm').requestSubmit()},120);
+}
+const papaPassField=el('papaPassword');
+papaPassField.addEventListener('focus',()=>{
+ papaStopAutofillWatch();papaManualTyping=false;papaAutofillSubmitted=false;
+ papaInitialPassword=papaPassField.value;papaWatchStarted=Date.now();
+ papaAutofillWatch=setInterval(()=>{
+  papaSubmitAutofilled();
+  if(Date.now()-papaWatchStarted>12000)papaStopAutofillWatch();
+ },150);
+});
+papaPassField.addEventListener('keydown',e=>{if(e.key!=='Tab'&&e.key!=='Enter')papaManualTyping=true});
+papaPassField.addEventListener('beforeinput',e=>{
+ if(e.inputType==='insertText'||e.inputType==='insertCompositionText'||e.inputType==='deleteContentBackward')papaManualTyping=true;
+});
+papaPassField.addEventListener('input',()=>setTimeout(papaSubmitAutofilled,80));
+papaPassField.addEventListener('change',()=>setTimeout(papaSubmitAutofilled,80));
+// Bei manuellem Tippen lässt sich das Formular mit der Return-Taste absenden.
 el('papaLoginForm').addEventListener('submit',async e=>{
- e.preventDefault();const btn=e.target.querySelector('button');btn.disabled=true;papaError('');
+ e.preventDefault();if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();const btn=e.target.querySelector('button');btn.disabled=true;papaError('');
  try{
  const username=el('papaUsername').value.trim();if(!['fabian','maya'].includes(username.toLowerCase()))throw Error('Benutzername nicht gefunden.');
  const {data:emailData,error:lookupError}=await papaClient.rpc('app_login_email',{p_username:username});if(lookupError||!emailData)throw Error('Benutzername nicht gefunden.');
