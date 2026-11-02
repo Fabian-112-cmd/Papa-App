@@ -1,0 +1,31 @@
+/* Privat-Apps V2 – Unser Glueck. Reine Darstellung, keine Daten-/Login-Aenderung. */
+:root{--privat-gruen:#0b3929;--privat-hell:#f8f8f0;--privat-linie:#dce8d9;--privat-text:#173b2b}
+html{background:#edf2e9;color:var(--privat-text)}
+body{background:linear-gradient(180deg,#f1f5eb44,#e9efe4bb),url("https://commons.wikimedia.org/wiki/Special:FilePath/Vineyard_during_sunset_%28Unsplash%29.jpg?width=1800") center/cover fixed!important;color:var(--privat-text);min-height:100vh}
+.top{background:#fffefa;border-bottom:1px solid #dce8d9;box-shadow:0 3px 15px #102b1914}
+.top .wrap{max-width:none}.brand b{color:#173b2b}.brand small{color:#567462}.brand img{content:url('apple-touch-icon.png');object-fit:cover}
+.main.wrap{max-width:1280px}
+.hero,.new-babyhero{background:linear-gradient(120deg,#103f2b,#2b6540)!important;border-color:#ffffff66;color:white;box-shadow:0 10px 30px #142b1830}
+.panel,.cat,.task,.quick,.new-tile,.new-progress{background:#fffefa!important;border:1px solid #e3e9dd!important;border-radius:17px;box-shadow:0 6px 17px #123e2519}
+.new-tile,.cat,.quick{color:#173b2b}.new-tile .tile-icon,.cat .emoji{background:#e9f2e5;color:#2e7748}
+.btn{background:#195f3f}.btn.secondary,.tiny{background:#e7f1e6;color:#1b6542}.linkbtn,.eyebrow,.cat .pct,.pill{color:#2b7645}
+.progress i,.mini i{background:#81a34b}.task input{accent-color:#267d4b}
+input,select,textarea{border-color:#cbdcca!important;color:#173b2b}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #86a76d;outline-offset:2px}
+.bottom{background:#0b392cf5;border-top:1px solid #dce8d955;box-shadow:0 -5px 20px #173e2518}
+.navinner button{color:#f0efdd}.navinner button.active{background:#91a83d;color:white}
+@media(min-width:981px){
+ .top{margin-left:252px}.top .wrap{max-width:none;padding-left:28px;padding-right:28px}
+ .main.wrap{max-width:1500px;margin-left:252px;margin-right:0;padding:26px 30px 55px}
+ .bottom{inset:0 auto 0 0;width:252px;height:100vh;border-radius:0;border-top:0;border-right:1px solid #dce8d955;padding:125px 13px 18px;background:linear-gradient(170deg,#073524,#0d452f 65%,#0b3024);overflow-y:auto}
+ .navinner{display:flex;flex-direction:column;max-width:none;gap:5px}
+ .navinner button{display:flex;flex-direction:row;justify-content:flex-start;align-items:center;gap:13px;text-align:left;min-height:46px;width:100%;padding:11px 13px;font-size:14px;border-radius:12px}
+ .navinner button .symbol{font-size:21px}
+ .navinner button.active{background:#829a42;color:#fff}
+}
+@media(max-width:980px){
+ .bottom{padding:7px max(7px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom));border-radius:18px 18px 0 0}
+ .navinner{max-width:650px;gap:3px}.navinner button{font-size:10px;min-height:54px;padding:6px 2px}
+ .main.wrap{padding:14px 12px calc(112px + env(safe-area-inset-bottom))}
+ .top .wrap{height:64px}.new-tile{min-height:72px}
+}
+@media(min-width:700px) and (max-width:980px){.main.wrap{max-width:950px;margin:auto}.quickgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}

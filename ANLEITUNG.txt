@@ -1,0 +1,5 @@
+UNSER GLUECK: 1) Lade die 6 Dateien (gemeinsames-design.css, apple-touch-icon.png, favicon.png, icon-180.png, icon-192.png, icon-512.png) ins HAUPTVERZEICHNIS von Papa-App hoch.
+2) Oeffne index.html in GitHub und fuege UNMITTELBAR VOR </head> folgende Zeile ein:
+<link rel="stylesheet" href="gemeinsames-design.css?v=privat-v2">
+3) Commit changes. Die originale index.html bleibt ansonsten unveraendert.
+4) Auf dem iPhone Safari neu laden; bei altem Icon ggf. Home-Bildschirm-Icon neu anlegen.
