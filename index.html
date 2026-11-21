@@ -268,9 +268,14 @@ $('docList').addEventListener('click',async e=>{
    if(target===item.path){status('Das Dokument befindet sich bereits in diesem Ordner.');confirmMove.disabled=false;return}
    try{
     const storage=papaClient.storage.from(BUCKET);
-    const {error:copyError}=await storage.copy(item.path,target);if(copyError)throw new Error('Kopieren nicht möglich: '+copyError.message);
+    // Storage.copy rejects percent-encoded folder keys in some Supabase versions.
+    // Use the proven signed download + upload route; never overwrite a destination.
+    const {data:blob,error:downloadError}=await storage.download(item.path);
+    if(downloadError||!blob)throw new Error('Original konnte nicht gelesen werden: '+(downloadError?.message||'Keine Daten'));
+    const {error:uploadError}=await storage.upload(target,blob,{upsert:false,contentType:blob.type||'application/octet-stream'});
+    if(uploadError)throw new Error('Ziel konnte nicht gespeichert werden: '+uploadError.message);
     const {data:verified,error:verifyError}=await storage.list(target.slice(0,target.lastIndexOf('/')),{limit:1000});
-    if(verifyError||!verified?.some(f=>f.id&&f.name===item.name))throw new Error('Kopie konnte nicht bestätigt werden. Die ursprüngliche Datei bleibt erhalten.');
+    if(verifyError||!verified?.some(f=>f.id&&f.name===item.name&&(!blob.size||Number(f.metadata?.size)===blob.size)))throw new Error('Kopie konnte nicht bestätigt werden. Die ursprüngliche Datei bleibt erhalten.');
     const {error:removeError}=await storage.remove([item.path]);if(removeError)throw new Error('Datei wurde kopiert, aber das Original konnte nicht entfernt werden: '+removeError.message);
     await allDocs();status('Dokument erfolgreich verschoben.');
    }catch(err){status('Verschieben fehlgeschlagen: '+err.message)}finally{confirmMove.disabled=false}
