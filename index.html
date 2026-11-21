@@ -214,7 +214,7 @@ async function allDocs(){
   }
   const filter=$('docFilter').value;
   const legacyGroup=$('docFilter').querySelector('optgroup[label="Bisherige Ordner (bleiben erhalten)"]');
-  if(legacyGroup){for(const option of [...legacyGroup.options])option.hidden=!items.some(x=>x.cat===option.value);legacyGroup.hidden=!items.some(x=>LEGACY.includes(x.cat));}
+  if(legacyGroup){for(const option of legacyGroup.querySelectorAll('option'))option.hidden=!items.some(x=>x.cat===option.value);legacyGroup.hidden=!items.some(x=>LEGACY.includes(x.cat));}
   const shown=items.filter(x=>!filter||x.cat===filter||x.cat.startsWith(filter+'/')).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   list.innerHTML=shown.length?shown.map((x,i)=>`<div class="doc-entry"><span aria-hidden="true">📄</span><div class="doc-meta"><b>${safe(displayName(x.name))}</b><small>${safe(x.cat)} · ${x.date?new Date(x.date).toLocaleDateString('de-DE'):''}${x.size?' · '+Math.round(x.size/1024)+' KB':''}</small></div><button type="button" class="btn secondary" data-doc-open="${i}">Öffnen</button><button type="button" class="btn secondary" data-doc-move="${i}">Verschieben</button><button type="button" class="tiny doc-remove" data-doc-delete="${i}">Löschen</button></div>`).join(''):'<p class="muted">Keine Dokumente in diesem Ordner.</p>';
   window.__papaDocItems=shown;
