@@ -25,7 +25,7 @@ html{background:#eaf1f2}body{min-height:100vh;background:linear-gradient(180deg,
 <div id="baby-appointments" class="baby-pane" hidden><div class="panel"><h2>Unsere Termine</h2><form id="appointmentForm" class="formgrid"><label>Bezeichnung<input name="title" type="text" required maxlength="100" placeholder="z. B. Frauenarzt"></label><label>Datum und Uhrzeit<input name="date" type="datetime-local" required></label><label>Ort / Notiz<input name="note" type="text" maxlength="300"></label><button class="btn" type="submit">Termin speichern</button></form></div><div id="appointmentList"></div></div>
 <div id="baby-milestones" class="baby-pane" hidden><div class="panel"><h2>Besondere Meilensteine</h2><form id="milestoneForm" class="formgrid"><label>Was ist passiert?<input name="title" type="text" required maxlength="120" placeholder="z. B. Erster Ultraschall"></label><label>Datum<input name="date" type="date" required></label><button class="btn" type="submit">Meilenstein speichern</button></form></div><div id="milestoneList"></div></div>
 <div id="baby-baby" class="baby-pane" hidden><div class="panel"><h2>Baby-Modus</h2><p class="notice">Nach der Geburt könnt ihr das tatsächliche Geburtsdatum eintragen. Alle Erinnerungen aus der Schwangerschaft bleiben erhalten.</p><label class="baby-label">Geburtsdatum<input id="babyBorn" type="date"></label><button class="btn secondary" type="button" id="babyBornSave">Geburtsdatum speichern</button><p id="babyAge" class="muted"></p></div><div id="babyLogArea" hidden><div class="panel"><h2>Unser Baby-Alltag</h2><form id="babyLogForm" class="formgrid"><label>Eintrag<select name="kind"><option>Fütterung</option><option>Schlaf</option><option>Windel</option><option>Wachstum</option><option>Sonstiges</option></select></label><label>Notiz<input name="note" type="text" maxlength="200" placeholder="Optional"></label><button class="btn" type="submit">Eintrag speichern</button></form></div><div id="babyLogList"></div></div></div>
-</section><section id="documents" class="view"><div class="titlebar"><h1>▤ Unsere Dokumente</h1></div><div class="panel"><h2>Dokument ablegen</h2><p class="notice">Arztunterlagen, Ultraschallbilder, Anträge und andere wichtige Dateien – gemeinsam für Fabian und Maya.</p><form id="docUploadForm" class="formgrid"><label>Kategorie<select id="docCategory"><option>Frauenarzt & Untersuchungen</option><option>Hebamme & Geburt</option><option>Anträge & Versicherungen</option><option>Sonstige Dokumente</option></select></label><label>Datei auswählen (PDF oder Bild)<input id="docFile" type="file" accept="application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif" required></label><button class="btn" type="submit">+ Dokument hochladen</button></form><p class="doc-status" id="docStatus" role="status"></p><p class="doc-help">Dateien werden nur in einem privaten Supabase-Speicher abgelegt. Dafür muss einmalig die beiliegende SQL-Einrichtung ausgeführt werden. Maximal 15 MB je Datei.</p></div><div class="panel"><div class="sectionline"><h2>Gespeicherte Dokumente</h2><button type="button" class="linkbtn" id="docRefresh">Aktualisieren</button></div><div class="doc-actions"><select id="docFilter" aria-label="Kategorie filtern"><option value="">Alle Kategorien</option><option>Frauenarzt & Untersuchungen</option><option>Hebamme & Geburt</option><option>Anträge & Versicherungen</option><option>Sonstige Dokumente</option></select></div><div id="docList" class="doc-list"><p class="muted">Zum Laden bitte anmelden.</p></div></div></section><section id="more" class="view"><div class="titlebar"><h1>⚙️ Mehr & Einstellungen</h1></div><div class="panel"><h2>Eigene Aufgabe</h2><form id="addForm" class="formgrid"><label>Aufgabe<input id="customText" type="text" required maxlength="180" placeholder="Was steht noch an?"></label><label>Kategorie<select id="customCategory"></select></label><button class="btn" type="submit">+ Aufgabe speichern</button></form></div><div class="panel"><h2>👤 Anmeldung</h2><p class="notice" id="papaCurrentUser">Angemeldet</p><button class="btn secondary" id="papaLogout" type="button">Abmelden</button></div><div class="panel"><h2>💾 Sicherung</h2><p class="notice">Deine Daten werden mit eurem gemeinsamen Unser Glück in Supabase synchronisiert. Die Sicherung kannst du zusätzlich herunterladen.</p><button id="downloadBackup" class="btn secondary">Sicherung herunterladen</button><label style="display:block;margin-top:12px" class="notice">Sicherung importieren <input id="importBackup" type="file" accept=".json,application/json" style="max-width:100%"></label></div><div class="panel"><h2>ℹ️ Hinweise</h2><p class="notice">Diese App ist eine organisatorische Checkliste, keine Rechts- oder medizinische Beratung. Für eure individuelle Situation gelten die jeweils aktuellen gesetzlichen Regelungen.</p></div></section></main><nav class="bottom" aria-label="Hauptnavigation"><div class="navinner"><button class="active" data-go="home"><span class="symbol">⌂</span>Start</button><button data-go="categories"><span class="symbol">▦</span>Kategorien</button><button data-go="more" data-add="1"><span class="symbol">⊕</span>Aufgabe</button><button data-go="dates"><span class="symbol">▣</span>Termine</button><button data-go="documents"><span class="symbol">▤</span>Dokumente</button><button data-go="more"><span class="symbol">⋯</span>Mehr</button></div></nav><script>const DATA=[
+</section><section id="documents" class="view"><div class="titlebar"><h1>▤ Unsere Dokumente</h1></div><div class="panel"><h2>Dokument ablegen</h2><p class="notice">Arztunterlagen, Ultraschallbilder, Anträge und andere wichtige Dateien – gemeinsam für Fabian und Maya.</p><form id="docUploadForm" class="formgrid"><label>Kategorie<select id="docCategory"></select></label><label>Datei auswählen (PDF oder Bild)<input id="docFile" type="file" accept="application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif" required></label><button class="btn" type="submit">+ Dokument hochladen</button></form><p class="doc-status" id="docStatus" role="status"></p><p class="doc-help">Dateien werden nur in einem privaten Supabase-Speicher abgelegt. Dafür muss einmalig die beiliegende SQL-Einrichtung ausgeführt werden. Maximal 15 MB je Datei.</p></div><div class="panel"><div class="sectionline"><h2>Gespeicherte Dokumente</h2><button type="button" class="linkbtn" id="docRefresh">Aktualisieren</button></div><div class="doc-actions"><select id="docFilter" aria-label="Ordner filtern"></select></div><div id="docList" class="doc-list"><p class="muted">Zum Laden bitte anmelden.</p></div></div></section><section id="more" class="view"><div class="titlebar"><h1>⚙️ Mehr & Einstellungen</h1></div><div class="panel"><h2>Eigene Aufgabe</h2><form id="addForm" class="formgrid"><label>Aufgabe<input id="customText" type="text" required maxlength="180" placeholder="Was steht noch an?"></label><label>Kategorie<select id="customCategory"></select></label><button class="btn" type="submit">+ Aufgabe speichern</button></form></div><div class="panel"><h2>👤 Anmeldung</h2><p class="notice" id="papaCurrentUser">Angemeldet</p><button class="btn secondary" id="papaLogout" type="button">Abmelden</button></div><div class="panel"><h2>💾 Sicherung</h2><p class="notice">Deine Daten werden mit eurem gemeinsamen Unser Glück in Supabase synchronisiert. Die Sicherung kannst du zusätzlich herunterladen.</p><button id="downloadBackup" class="btn secondary">Sicherung herunterladen</button><label style="display:block;margin-top:12px" class="notice">Sicherung importieren <input id="importBackup" type="file" accept=".json,application/json" style="max-width:100%"></label></div><div class="panel"><h2>ℹ️ Hinweise</h2><p class="notice">Diese App ist eine organisatorische Checkliste, keine Rechts- oder medizinische Beratung. Für eure individuelle Situation gelten die jeweils aktuellen gesetzlichen Regelungen.</p></div></section></main><nav class="bottom" aria-label="Hauptnavigation"><div class="navinner"><button class="active" data-go="home"><span class="symbol">⌂</span>Start</button><button data-go="categories"><span class="symbol">▦</span>Kategorien</button><button data-go="more" data-add="1"><span class="symbol">⊕</span>Aufgabe</button><button data-go="dates"><span class="symbol">▣</span>Termine</button><button data-go="documents"><span class="symbol">▤</span>Dokumente</button><button data-go="more"><span class="symbol">⋯</span>Mehr</button></div></nav><script>const DATA=[
 ['🤰','Schwangerschaft & Gesundheit',['Ersten Frauenarzttermin vereinbaren','Mutterpass und Vorsorgetermine im Blick behalten','Hebamme für Betreuung und Wochenbett suchen','Über Schwangerschaftsernährung und Nahrungsergänzung ärztlich beraten lassen','Fragen für Vorsorgetermine sammeln','Über Pränataldiagnostik und Untersuchungen informieren','Zahnarztkontrolle in der Schwangerschaft organisieren','Gemeinsam über Wünsche und Sorgen sprechen']],
 ['⚖️','Vaterschaft & Sorgerecht',['Bei unverheirateten Eltern: Vaterschaftsanerkennung vor der Geburt vereinbaren','Bei unverheirateten Eltern: Gemeinsame Sorgeerklärung prüfen und gegebenenfalls abgeben','Benötigte Ausweise und Geburtsurkunden für Behördentermine bereitlegen','Familiennamen des Kindes besprechen','Heirat vor oder nach Geburt gemeinsam überlegen','Zuständiges Jugendamt oder Standesamt für Formalitäten kontaktieren']],
 ['💼','Elternzeit & Elterngeld',['Eigene Elternzeitmonate und gewünschten Beginn festlegen','Elternzeit bei der MIRO rechtzeitig in Textform anmelden (regelmäßig 7 Wochen vorher)','Schichtzulagen und Elterngeldberechnung prüfen','ElterngeldPlus, Basiselterngeld und Partnerschaftsbonus vergleichen','Für selbstständige Winzerin: Bemessungszeitraum und Gewinnunterlagen prüfen','Bei selbstständiger Tätigkeit: Weiterarbeit und Elterngeldanrechnung prüfen','Gemeinsamen Elterngeldplan nach Lebensmonaten erstellen','Elterngeldantrag und Nachweise vorbereiten','Bei Bedarf Elterngeldstelle oder Steuerberatung konsultieren']],
@@ -159,7 +159,24 @@ setInterval(()=>{if(document.visibilityState==='visible')papaRefresh()},4000);
 </script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script>
 (function(){
 const BUCKET='papa-private-documents';
-const CATEGORIES=['Frauenarzt & Untersuchungen','Hebamme & Geburt','Anträge & Versicherungen','Sonstige Dokumente'];
+const FOLDERS={
+ 'Schwangerschaft':['Frauenarzt & Ultraschall','Mutterpass & Untersuchungen','Labor & Blutwerte','Hebamme'],
+ 'Baby':['Geburt & Krankenhaus','Geburtsurkunde','Kinderarzt & U-Untersuchungen'],
+ 'Anträge & Behörden':['Elterngeld','Kindergeld','Krankenkasse','Sonstiges']
+};
+const LEGACY=['Frauenarzt & Untersuchungen','Hebamme & Geburt','Anträge & Versicherungen','Sonstige Dokumente'];
+const CATEGORIES=[...Object.entries(FOLDERS).flatMap(([group,children])=>children.map(child=>group+'/'+child)),...LEGACY];
+function populateDocMenus(){
+ const upload=document.getElementById('docCategory'),filter=document.getElementById('docFilter');
+ const make=(select,all)=>{select.replaceChildren();if(all)select.add(new Option('Alle Ordner',''));
+  for(const [group,children] of Object.entries(FOLDERS)){const optgroup=document.createElement('optgroup');optgroup.label=group;
+   for(const child of children){const path=group+'/'+child;optgroup.appendChild(new Option(child,path))}select.appendChild(optgroup)}
+  const old=document.createElement('optgroup');old.label='Bisherige Ordner (bleiben erhalten)';
+  for(const cat of LEGACY)old.appendChild(new Option(cat,cat));select.appendChild(old);
+ };
+ make(upload,false);make(filter,true);
+}
+populateDocMenus();
 const $=id=>document.getElementById(id);
 const status=t=>{$('docStatus').textContent=t};
 const safe=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -170,32 +187,35 @@ async function allDocs(){
  if(!ready()){status('Bitte zuerst anmelden.');return false}
  const list=$('docList');list.textContent='Dokumente werden geladen …';
  const family=base();if(!family){status('Fehler: Familienkennung fehlt.');return false}
- const storage=papaClient.storage.from(BUCKET),items=[],seen=new Set(),diagnostics=[];
+ const storage=papaClient.storage.from(BUCKET),items=[],seen=new Set();
  const probe=async path=>{
   const {data,error}=await storage.list(path,{limit:1000});
-  diagnostics.push((error?'FEHLER':'OK')+' ['+path+']: '+(error?error.message:(data||[]).length+' Einträge'));
-  return error?[]:(data||[]);
+  if(error)throw new Error('Ordner konnte nicht gelesen werden: '+error.message);
+  return data||[];
  };
  try{
   const root=await probe(family);
-  const folderNames=new Set(root.filter(f=>!f.id).map(f=>f.name));
-  for(const cat of CATEGORIES){folderNames.add(cat);folderNames.add(encodeURIComponent(cat))}
-  for(const folder of folderNames){
-   const path=family+'/'+folder;
-   const files=await probe(path);
+  const rootFolders=new Set(root.filter(f=>!f.id).map(f=>f.name));
+  for(const cat of [...LEGACY,...Object.keys(FOLDERS)]){rootFolders.add(cat);rootFolders.add(encodeURIComponent(cat))}
+  const addFile=(path,name,folder,file)=>{
+   const fullPath=path+'/'+file.name;if(seen.has(fullPath))return;seen.add(fullPath);
+   items.push({cat:folder,name:file.name,path:fullPath,date:file.created_at||'',size:file.metadata?.size||0});
+  };
+  const decode=name=>{try{return decodeURIComponent(name)}catch{return name}};
+  for(const folder of rootFolders){
+   const path=family+'/'+folder,files=await probe(path),label=decode(folder);
    for(const f of files){
-    if(!f.id)continue;
-    const fullPath=path+'/'+f.name;if(seen.has(fullPath))continue;seen.add(fullPath);
-    let cat=folder;try{cat=decodeURIComponent(folder)}catch{}
-    items.push({cat,name:f.name,path:fullPath,date:f.created_at||'',size:f.metadata?.size||0});
+    if(f.id)addFile(path,f.name,label,f);
+    else{
+     const subPath=path+'/'+f.name,subFiles=await probe(subPath),subLabel=label+'/'+decode(f.name);
+     for(const sub of subFiles)if(sub.id)addFile(subPath,sub.name,subLabel,sub);
+    }
    }
   }
   const filter=$('docFilter').value;
-  const shown=items.filter(x=>!filter||x.cat===filter).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  const shown=items.filter(x=>!filter||x.cat===filter||x.cat.startsWith(filter+'/')).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   list.innerHTML=shown.length?shown.map((x,i)=>`<div class="doc-entry"><span aria-hidden="true">📄</span><div class="doc-meta"><b>${safe(displayName(x.name))}</b><small>${safe(x.cat)} · ${x.date?new Date(x.date).toLocaleDateString('de-DE'):''}${x.size?' · '+Math.round(x.size/1024)+' KB':''}</small></div><button type="button" class="btn secondary" data-doc-open="${i}">Öffnen</button><button type="button" class="tiny doc-remove" data-doc-delete="${i}">Löschen</button></div>`).join(''):'<p class="muted">Keine Dokumente gefunden. Bitte Diagnose unten ansehen.</p>';
   window.__papaDocItems=shown;
-  let box=$('docDiagnostic');if(!box){box=document.createElement('pre');box.id='docDiagnostic';box.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;background:#f2f5f1;padding:12px;border-radius:10px;margin-top:12px';list.after(box)}
-  box.textContent='Dokumenten-Diagnose (keine Änderungen an Dateien):\n'+diagnostics.join('\n')+'\nGefundene Dateien gesamt: '+items.length+'; im Filter: '+shown.length;
   status(items.length?'Dokumente geladen.':'Keine Dateien lesbar – bitte Diagnose prüfen.');
   return true;
  }catch(e){list.textContent='Dokumente konnten nicht geladen werden.';status('Lesefehler: '+e.message);return false}
@@ -208,7 +228,7 @@ $('docUploadForm').addEventListener('submit',async e=>{
  const allowed=['application/pdf','image/jpeg','image/png','image/webp','image/heic','image/heif'];
  if(!allowed.includes(file.type)&&!/\.(pdf|jpe?g|png|webp|heic|heif)$/i.test(file.name)){status('Bitte nur PDF oder Bilder auswählen.');return}
  const filename=file.name.replace(/[\/\\]/g,'_').replace(/[\x00-\x1f]/g,'').slice(0,120);
- const path=base()+'/'+encodeURIComponent(cat)+'/'+crypto.randomUUID()+'__'+filename;
+ const path=base()+'/'+cat.split('/').map(encodeURIComponent).join('/')+'/'+crypto.randomUUID()+'__'+filename;
  const button=e.target.querySelector('button[type=submit]');button.disabled=true;status('Dokument wird hochgeladen …');
  try{const {error}=await papaClient.storage.from(BUCKET).upload(path,file,{upsert:false,contentType:file.type||'application/octet-stream'});if(error)throw error;$('docFile').value='';await allDocs();status('Dokument erfolgreich gespeichert.')}catch(err){status('Upload fehlgeschlagen: '+err.message)}finally{button.disabled=false}
 });
