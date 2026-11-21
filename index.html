@@ -172,7 +172,7 @@ function populateDocMenus(){
   for(const [group,children] of Object.entries(FOLDERS)){const optgroup=document.createElement('optgroup');optgroup.label=group;
    for(const child of children){const path=group+'/'+child;optgroup.appendChild(new Option(child,path))}select.appendChild(optgroup)}
   const old=document.createElement('optgroup');old.label='Bisherige Ordner (bleiben erhalten)';
-  for(const cat of LEGACY)old.appendChild(new Option(cat,cat));select.appendChild(old);
+  for(const cat of LEGACY)old.appendChild(new Option(cat,cat));if(all)select.appendChild(old);
  };
  make(upload,false);make(filter,true);
 }
@@ -213,8 +213,10 @@ async function allDocs(){
    }
   }
   const filter=$('docFilter').value;
+  const legacyGroup=$('docFilter').querySelector('optgroup[label="Bisherige Ordner (bleiben erhalten)"]');
+  if(legacyGroup){for(const option of [...legacyGroup.options])option.hidden=!items.some(x=>x.cat===option.value);legacyGroup.hidden=!items.some(x=>LEGACY.includes(x.cat));}
   const shown=items.filter(x=>!filter||x.cat===filter||x.cat.startsWith(filter+'/')).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
-  list.innerHTML=shown.length?shown.map((x,i)=>`<div class="doc-entry"><span aria-hidden="true">📄</span><div class="doc-meta"><b>${safe(displayName(x.name))}</b><small>${safe(x.cat)} · ${x.date?new Date(x.date).toLocaleDateString('de-DE'):''}${x.size?' · '+Math.round(x.size/1024)+' KB':''}</small></div><button type="button" class="btn secondary" data-doc-open="${i}">Öffnen</button><button type="button" class="tiny doc-remove" data-doc-delete="${i}">Löschen</button></div>`).join(''):'<p class="muted">Keine Dokumente gefunden. Bitte Diagnose unten ansehen.</p>';
+  list.innerHTML=shown.length?shown.map((x,i)=>`<div class="doc-entry"><span aria-hidden="true">📄</span><div class="doc-meta"><b>${safe(displayName(x.name))}</b><small>${safe(x.cat)} · ${x.date?new Date(x.date).toLocaleDateString('de-DE'):''}${x.size?' · '+Math.round(x.size/1024)+' KB':''}</small></div><button type="button" class="btn secondary" data-doc-open="${i}">Öffnen</button><button type="button" class="btn secondary" data-doc-move="${i}">Verschieben</button><button type="button" class="tiny doc-remove" data-doc-delete="${i}">Löschen</button></div>`).join(''):'<p class="muted">Keine Dokumente in diesem Ordner.</p>';
   window.__papaDocItems=shown;
   status(items.length?'Dokumente geladen.':'Keine Dateien lesbar – bitte Diagnose prüfen.');
   return true;
@@ -233,10 +235,32 @@ $('docUploadForm').addEventListener('submit',async e=>{
  try{const {error}=await papaClient.storage.from(BUCKET).upload(path,file,{upsert:false,contentType:file.type||'application/octet-stream'});if(error)throw error;$('docFile').value='';await allDocs();status('Dokument erfolgreich gespeichert.')}catch(err){status('Upload fehlgeschlagen: '+err.message)}finally{button.disabled=false}
 });
 $('docList').addEventListener('click',async e=>{
- const open=e.target.closest('[data-doc-open]'),del=e.target.closest('[data-doc-delete]');if(!open&&!del)return;
- const item=(window.__papaDocItems||[])[Number((open||del).dataset[open?'docOpen':'docDelete'])];if(!item||!ready())return;
+ const open=e.target.closest('[data-doc-open]'),del=e.target.closest('[data-doc-delete]'),move=e.target.closest('[data-doc-move]');if(!open&&!del&&!move)return;
+ const clicked=open||del||move;const item=(window.__papaDocItems||[])[Number(clicked.dataset[open?'docOpen':del?'docDelete':'docMove'])];if(!item||!ready())return;
  try{
  if(open){const tab=window.open('about:blank','_blank');try{const {data,error}=await papaClient.storage.from(BUCKET).createSignedUrl(item.path,60);if(error)throw error;if(tab)tab.location.href=data.signedUrl;else status('Pop-up blockiert. Bitte Pop-ups für diese Seite erlauben.')}catch(err){if(tab)tab.close();throw err}}
+ else if(move){
+  const entry=move.closest('.doc-entry');
+  if(entry.querySelector('.doc-move-select')){entry.querySelector('.doc-move-select').remove();return}
+  const select=document.createElement('select');select.className='doc-move-select';select.setAttribute('aria-label','Zielordner auswählen');
+  select.add(new Option('Zielordner auswählen …',''));
+  for(const [group,children] of Object.entries(FOLDERS)){const g=document.createElement('optgroup');g.label=group;for(const child of children){const folder=group+'/'+child;if(folder!==item.cat)g.appendChild(new Option(child,folder))}select.appendChild(g)}
+  const confirmMove=document.createElement('button');confirmMove.type='button';confirmMove.className='btn secondary';confirmMove.textContent='Bestätigen';
+  const controls=document.createElement('div');controls.className='doc-move-controls';controls.style.cssText='display:flex;gap:8px;flex-wrap:wrap;width:100%;margin-top:8px';select.style.cssText='flex:1;min-width:180px';controls.append(select,confirmMove);entry.appendChild(controls);
+  confirmMove.addEventListener('click',async()=>{
+   if(!select.value){status('Bitte zuerst einen Zielordner auswählen.');return}
+   confirmMove.disabled=true;status('Dokument wird verschoben …');
+   const target=base()+'/'+select.value.split('/').map(encodeURIComponent).join('/')+'/'+item.name;
+   try{
+    const storage=papaClient.storage.from(BUCKET);
+    const {error:copyError}=await storage.copy(item.path,target);if(copyError)throw copyError;
+    const {data:verified,error:verifyError}=await storage.list(target.slice(0,target.lastIndexOf('/')),{limit:1000});
+    if(verifyError||!verified?.some(f=>f.id&&f.name===item.name))throw new Error('Kopie konnte nicht bestätigt werden. Die ursprüngliche Datei bleibt erhalten.');
+    const {error:removeError}=await storage.remove([item.path]);if(removeError)throw new Error('Datei wurde kopiert, aber das Original konnte nicht entfernt werden: '+removeError.message);
+    await allDocs();status('Dokument erfolgreich verschoben.');
+   }catch(err){status('Verschieben fehlgeschlagen: '+err.message)}finally{confirmMove.disabled=false}
+  });
+ }
  else if(confirm('Dieses Dokument wirklich dauerhaft löschen?')){const {error}=await papaClient.storage.from(BUCKET).remove([item.path]);if(error)throw error;await allDocs();status('Dokument gelöscht.')}
  }catch(err){status('Aktion fehlgeschlagen: '+err.message)}
 });
