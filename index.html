@@ -276,9 +276,15 @@ $('docList').addEventListener('click',async e=>{
     if(downloadError||!blob)throw new Error('Original konnte nicht gelesen werden: '+(downloadError?.message||'Keine Daten'));
     const {error:uploadError}=await storage.upload(target,blob,{upsert:false,contentType:blob.type||'application/octet-stream'});
     if(uploadError)throw new Error('Ziel konnte nicht gespeichert werden: '+uploadError.message);
-    const {data:verified,error:verifyError}=await storage.list(destinationFolder,{limit:1000});
-    if(verifyError||!verified?.some(f=>f.id&&f.name===target.slice(destinationFolder.length+1)&&(!blob.size||Number(f.metadata?.size)===blob.size)))throw new Error('Kopie konnte nicht bestätigt werden. Die ursprüngliche Datei bleibt erhalten.');
-    const {error:removeError}=await storage.remove([item.path]);if(removeError)throw new Error('Datei wurde kopiert, aber das Original konnte nicht entfernt werden: '+removeError.message);
+    // The Storage list endpoint can omit or delay metadata for a new object.
+    // Verify the exact target by downloading it instead of relying on folder listing.
+    const {data:checked,error:checkError}=await storage.download(target);
+    if(checkError||!checked||checked.size!==blob.size){
+      throw new Error('Neue Datei konnte nicht vollständig geprüft werden. Das Original bleibt erhalten.');
+    }
+    // Only delete the source after the destination has been downloaded and size-checked.
+    const {error:removeError}=await storage.remove([item.path]);
+    if(removeError)throw new Error('Kopie ist vorhanden, aber das Original konnte nicht entfernt werden: '+removeError.message);
     await allDocs();status('Dokument erfolgreich verschoben.');
    }catch(err){status('Verschieben fehlgeschlagen: '+err.message)}finally{confirmMove.disabled=false}
   });
