@@ -167,21 +167,38 @@ function base(){return typeof PAPA_FAMILY!=='undefined'?String(PAPA_FAMILY):null
 function ready(){return typeof papaClient!=='undefined'&&papaClient&&typeof papaUserId!=='undefined'&&papaUserId}
 function displayName(n){const i=n.indexOf('__');return i<0?n:n.slice(i+2)}
 async function allDocs(){
- if(!ready()){status('Bitte zuerst anmelden.');return}
+ if(!ready()){status('Bitte zuerst anmelden.');return false}
  const list=$('docList');list.textContent='Dokumente werden geladen …';
+ const family=base();if(!family){status('Fehler: Familienkennung fehlt.');return false}
+ const storage=papaClient.storage.from(BUCKET),items=[],seen=new Set(),diagnostics=[];
+ const probe=async path=>{
+  const {data,error}=await storage.list(path,{limit:1000});
+  diagnostics.push((error?'FEHLER':'OK')+' ['+path+']: '+(error?error.message:(data||[]).length+' Einträge'));
+  return error?[]:(data||[]);
+ };
  try{
- const items=[];
- for(const cat of CATEGORIES){
-  const path=base()+'/'+encodeURIComponent(cat);
-  const {data,error}=await papaClient.storage.from(BUCKET).list(path,{limit:1000,sortBy:{column:'created_at',order:'desc'}});
-  if(error)throw error;
-  for(const f of data||[]){if(f.id)items.push({cat,name:f.name,path:path+'/'+f.name,date:f.created_at||'',size:f.metadata?.size||0})}
- }
- const filter=$('docFilter').value;
- const shown=items.filter(x=>!filter||x.cat===filter).sort((a,b)=>b.date.localeCompare(a.date));
- list.innerHTML=shown.length?shown.map((x,i)=>`<div class="doc-entry"><span aria-hidden="true">📄</span><div class="doc-meta"><b>${safe(displayName(x.name))}</b><small>${safe(x.cat)} · ${x.date?new Date(x.date).toLocaleDateString('de-DE'):''}${x.size?' · '+Math.round(x.size/1024)+' KB':''}</small></div><button type="button" class="btn secondary" data-doc-open="${i}">Öffnen</button><button type="button" class="tiny doc-remove" data-doc-delete="${i}">Löschen</button></div>`).join(''):'<p class="muted">Noch keine Dokumente in dieser Kategorie.</p>';
- window.__papaDocItems=shown;status('');
- }catch(e){list.textContent='Dokumente konnten nicht geladen werden.';status('Speicher nicht eingerichtet oder keine Berechtigung: '+e.message)}
+  const root=await probe(family);
+  const folderNames=new Set(root.filter(f=>!f.id).map(f=>f.name));
+  for(const cat of CATEGORIES){folderNames.add(cat);folderNames.add(encodeURIComponent(cat))}
+  for(const folder of folderNames){
+   const path=family+'/'+folder;
+   const files=await probe(path);
+   for(const f of files){
+    if(!f.id)continue;
+    const fullPath=path+'/'+f.name;if(seen.has(fullPath))continue;seen.add(fullPath);
+    let cat=folder;try{cat=decodeURIComponent(folder)}catch{}
+    items.push({cat,name:f.name,path:fullPath,date:f.created_at||'',size:f.metadata?.size||0});
+   }
+  }
+  const filter=$('docFilter').value;
+  const shown=items.filter(x=>!filter||x.cat===filter).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  list.innerHTML=shown.length?shown.map((x,i)=>`<div class="doc-entry"><span aria-hidden="true">📄</span><div class="doc-meta"><b>${safe(displayName(x.name))}</b><small>${safe(x.cat)} · ${x.date?new Date(x.date).toLocaleDateString('de-DE'):''}${x.size?' · '+Math.round(x.size/1024)+' KB':''}</small></div><button type="button" class="btn secondary" data-doc-open="${i}">Öffnen</button><button type="button" class="tiny doc-remove" data-doc-delete="${i}">Löschen</button></div>`).join(''):'<p class="muted">Keine Dokumente gefunden. Bitte Diagnose unten ansehen.</p>';
+  window.__papaDocItems=shown;
+  let box=$('docDiagnostic');if(!box){box=document.createElement('pre');box.id='docDiagnostic';box.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;background:#f2f5f1;padding:12px;border-radius:10px;margin-top:12px';list.after(box)}
+  box.textContent='Dokumenten-Diagnose (keine Änderungen an Dateien):\n'+diagnostics.join('\n')+'\nGefundene Dateien gesamt: '+items.length+'; im Filter: '+shown.length;
+  status(items.length?'Dokumente geladen.':'Keine Dateien lesbar – bitte Diagnose prüfen.');
+  return true;
+ }catch(e){list.textContent='Dokumente konnten nicht geladen werden.';status('Lesefehler: '+e.message);return false}
 }
 $('docUploadForm').addEventListener('submit',async e=>{
  e.preventDefault();if(!ready()){status('Bitte zuerst anmelden.');return}
